@@ -10,6 +10,9 @@ import java.util.List;
 
 public interface TreatmentRepository extends JpaRepository<Treatment, Long> {
 
+    // Capa Service: tratamientos de un animal por su animalCode, en orden cronológico
+    List<Treatment> findByAnimalAnimalCodeOrderByPerformedAtAsc(String animalCode);
+
     // Paso 41: tratamientos de un animal ordenados cronológicamente (Query Method)
     List<Treatment> findByAnimalIdOrderByPerformedAtAsc(Long animalId);
 

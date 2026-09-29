@@ -1,0 +1,26 @@
+<!-- <properties> -->
+<mapstruct.version>1.6.3</mapstruct.version>
+
+<!-- <dependencies> -->
+<dependency>
+    <groupId>org.mapstruct</groupId>
+    <artifactId>mapstruct</artifactId>
+    <version>${mapstruct.version}</version>
+</dependency>
+
+<!-- <build><plugins> -->
+<plugin>
+    <groupId>org.apache.maven.plugins</groupId>
+    <artifactId>maven-compiler-plugin</artifactId>
+    <configuration>
+        <annotationProcessorPaths>
+            <path>
+                <groupId>org.mapstruct</groupId>
+                <artifactId>mapstruct-processor</artifactId>
+                <version>${mapstruct.version}</version>
+            </path>
+            <!-- Si tus entidades usan Lombok, agrega Lombok AQUÍ ANTES de mapstruct-processor
+                 y también lombok-mapstruct-binding -->
+        </annotationProcessorPaths>
+    </configuration>
+</plugin>
