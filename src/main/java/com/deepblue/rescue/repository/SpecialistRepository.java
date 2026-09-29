@@ -6,8 +6,12 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface SpecialistRepository extends JpaRepository<Specialist, Long> {
+
+    // Capa Service: buscar especialista por su código profesional
+    Optional<Specialist> findByProfessionalCode(String professionalCode);
 
     // Paso 39: especialistas activos que posean determinada experiencia (JPQL)
     @Query("""
