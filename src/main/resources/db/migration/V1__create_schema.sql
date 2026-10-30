@@ -1,0 +1,167 @@
+-- ============================================
+-- 1. RESCUE CENTERS
+-- ============================================
+
+CREATE TABLE rescue_centers (
+    id BIGSERIAL PRIMARY KEY,
+    code VARCHAR(100) NOT NULL UNIQUE,
+    name VARCHAR(255) NOT NULL,
+    city VARCHAR(255) NOT NULL
+);
+
+
+-- ============================================
+-- 2. RESCUE CASES
+-- ============================================
+
+CREATE TABLE rescue_cases (
+    id BIGSERIAL PRIMARY KEY,
+    case_code VARCHAR(50) NOT NULL UNIQUE,
+    rescue_date DATE NOT NULL,
+    rescue_location VARCHAR(255) NOT NULL,
+    status VARCHAR(50) NOT NULL,
+    rescue_center_id BIGINT NOT NULL,
+
+    CONSTRAINT fk_rescue_case_center
+        FOREIGN KEY (rescue_center_id)
+            REFERENCES rescue_centers(id),
+
+    CONSTRAINT chk_rescue_case_status
+        CHECK (
+            status IN (
+                'ADMITTED',
+                'UNDER_EVALUATION',
+                'IN_REHABILITATION',
+                'READY_FOR_RELEASE',
+                'RELEASED',
+                'CLOSED'
+            )
+        )
+);
+
+
+-- ============================================
+-- 3. ANIMALS
+-- ============================================
+
+CREATE TABLE animals (
+    id BIGSERIAL PRIMARY KEY,
+    animal_code VARCHAR(50) NOT NULL UNIQUE,
+    common_name VARCHAR(100) NOT NULL,
+    scientific_name VARCHAR(150) NOT NULL,
+    sex VARCHAR(20) NOT NULL,
+    tracking_device_code VARCHAR(100) UNIQUE,
+    rescue_case_id BIGINT NOT NULL UNIQUE,
+
+    CONSTRAINT fk_animal_rescue_case
+        FOREIGN KEY (rescue_case_id)
+            REFERENCES rescue_cases(id)
+);
+
+
+-- ============================================
+-- 4. MEDICAL RECORDS
+-- ============================================
+
+CREATE TABLE medical_records (
+    id BIGSERIAL PRIMARY KEY,
+    animal_id BIGINT NOT NULL UNIQUE,
+    initial_weight DECIMAL(10,2) NOT NULL,
+    initial_condition VARCHAR(255) NOT NULL,
+    injuries TEXT,
+    observations TEXT,
+
+    CONSTRAINT fk_medical_record_animal
+        FOREIGN KEY (animal_id)
+            REFERENCES animals(id)
+);
+
+
+-- ============================================
+-- 5. SPECIALISTS
+-- ============================================
+
+CREATE TABLE specialists (
+    id BIGSERIAL PRIMARY KEY,
+    professional_code VARCHAR(50) NOT NULL UNIQUE,
+    first_name VARCHAR(100) NOT NULL,
+    last_name VARCHAR(100) NOT NULL,
+    email VARCHAR(255) NOT NULL UNIQUE,
+    active BOOLEAN NOT NULL
+);
+
+
+-- ============================================
+-- 6. EXPERTISE
+-- ============================================
+
+CREATE TABLE expertise (
+    id BIGSERIAL PRIMARY KEY,
+    name VARCHAR(100) NOT NULL UNIQUE
+);
+
+
+-- ============================================
+-- 7. SPECIALIST_EXPERTISE
+-- ============================================
+
+CREATE TABLE specialist_expertise (
+    specialist_id BIGINT NOT NULL,
+    expertise_id BIGINT NOT NULL,
+
+    CONSTRAINT pk_specialist_expertise
+        PRIMARY KEY (specialist_id, expertise_id),
+
+    CONSTRAINT fk_specialist_expertise_specialist
+        FOREIGN KEY (specialist_id)
+            REFERENCES specialists(id),
+
+    CONSTRAINT fk_specialist_expertise_expertise
+        FOREIGN KEY (expertise_id)
+            REFERENCES expertise(id)
+);
+
+
+-- ============================================
+-- 8. TREATMENTS
+-- ============================================
+
+CREATE TABLE treatments (
+    id BIGSERIAL PRIMARY KEY,
+    animal_id BIGINT NOT NULL,
+    specialist_id BIGINT NOT NULL,
+    performed_at TIMESTAMP NOT NULL,
+    type VARCHAR(50) NOT NULL,
+    description TEXT,
+
+    CONSTRAINT fk_treatment_animal
+        FOREIGN KEY (animal_id)
+            REFERENCES animals(id),
+
+    CONSTRAINT fk_treatment_specialist
+        FOREIGN KEY (specialist_id)
+            REFERENCES specialists(id)
+);
+
+
+-- ============================================
+-- ÍNDICES
+-- ============================================
+
+CREATE INDEX idx_rescue_cases_rescue_center_id
+    ON rescue_cases(rescue_center_id);
+
+CREATE INDEX idx_rescue_cases_status
+    ON rescue_cases(status);
+
+CREATE INDEX idx_rescue_cases_rescue_date
+    ON rescue_cases(rescue_date);
+
+CREATE INDEX idx_treatments_animal_id
+    ON treatments(animal_id);
+
+CREATE INDEX idx_treatments_specialist_id
+    ON treatments(specialist_id);
+
+CREATE INDEX idx_treatments_performed_at
+    ON treatments(performed_at);
