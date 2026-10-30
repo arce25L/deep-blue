@@ -1,0 +1,36 @@
+services:
+
+  db:
+    image: postgres:16-alpine
+    container_name: deepblue-db
+    environment:
+      POSTGRES_DB: deepblue
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - deepblue-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d deepblue"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  backend:
+    build: .
+    container_name: deepblue-backend
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DB_URL: jdbc:postgresql://db:5432/deepblue
+      DB_USER: postgres
+      DB_PASSWORD: postgres
+      # Migraciones + datos de prueba (la carpeta db/seed solo se carga aquí)
+      SPRING_FLYWAY_LOCATIONS: classpath:db/migration,classpath:db/seed
+    ports:
+      - "8080:8080"
+
+volumes:
+  deepblue-data:
